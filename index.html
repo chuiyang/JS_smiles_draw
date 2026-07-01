@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="用 RDKit.js 為指定鍵結標上 bond energy 並加上淺黃色 highlight。" />
+    <title>RDKit Bond Energy Viewer</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">MOLECULAR DEPICTION · RDKit.js</p>
+          <h1>Bond energy, drawn clearly.</h1>
+          <p class="intro">輸入 SMILES 與 <code>bond_index: bond_energy</code>，有數值的鍵結會套用淺黃色 highlight，並在鍵結上顯示標註。</p>
+        </div>
+        <div class="version-pill"><span></span><strong id="version">RDKit 載入中…</strong></div>
+      </header>
+
+      <section class="workspace">
+        <form id="controls" class="control-panel">
+          <label class="field-label" for="smiles">SMILES</label>
+          <textarea id="smiles" rows="3" spellcheck="false">CC(=O)Oc1ccccc1C(=O)O[H]</textarea>
+
+          <div class="field-heading">
+            <label class="field-label" for="bond-dict">Bond dict</label>
+            <span>bond index 從 0 開始</span>
+          </div>
+          <textarea id="bond-dict" rows="9" spellcheck="false">{
+  "0": 348,
+  "2": 358,
+  "3": 305,
+  "9": "C–C · 346 kJ/mol",
+  "11": 745,
+  "13": "O–H · 463 kJ/mol"
+}</textarea>
+          <p class="input-hint">C–H / O–H 請在 SMILES 使用顯式氫，例如 <code>O[H]</code>；該鍵結才會有 bond index。</p>
+
+          <div class="font-controls">
+            <label>
+              <span class="field-label">Label font</span>
+              <select id="font-family">
+                <option value="Inter, ui-sans-serif, system-ui, sans-serif">Inter / system</option>
+                <option value="Georgia, serif">Georgia</option>
+                <option value="ui-monospace, SFMono-Regular, Menlo, monospace">Monospace</option>
+              </select>
+            </label>
+            <label>
+              <span class="field-label">Note size <output id="font-size-value">17 px</output></span>
+              <input id="font-size" type="range" min="12" max="28" value="17" />
+            </label>
+            <label>
+              <span class="field-label">Atom size <output id="atom-font-size-value">20 px</output></span>
+              <input id="atom-font-size" type="range" min="12" max="30" value="20" />
+            </label>
+            <label>
+              <span class="field-label">Highlight width <output id="highlight-width-value">9×</output></span>
+              <input id="highlight-width" type="range" min="4" max="20" value="9" />
+            </label>
+          </div>
+
+          <button id="draw" type="submit">Draw molecule <span>→</span></button>
+          <p id="error" class="error" role="alert" aria-live="polite"></p>
+        </form>
+
+        <section class="drawing-panel" aria-label="分子圖">
+          <div class="drawing-toolbar">
+            <div><span class="highlight-key"></span>Bond energy supplied</div>
+            <div id="summary">準備繪圖…</div>
+          </div>
+          <div id="drawing" class="drawing" aria-live="polite">
+            <div class="loader"><span></span>正在載入 RDKit WebAssembly</div>
+          </div>
+          <div class="footnote">
+            <span>RDKit bond index</span>
+            <span>Original bond strokes preserved</span>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="/vendor/RDKit_minimal.js"></script>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>

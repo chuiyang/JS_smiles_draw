@@ -39,6 +39,11 @@ const ELEMENT_SYMBOLS = [
 let RDKit;
 let currentMol;
 
+function disposeMol(mol) {
+  if (!mol) return;
+  if (typeof mol.isDeleted !== "function" || !mol.isDeleted()) mol.delete();
+}
+
 function parseBondDict(raw) {
   const parsed = JSON.parse(raw);
   if (!parsed || Array.isArray(parsed) || typeof parsed !== "object") {
@@ -311,6 +316,7 @@ function prepareMolecule(smiles, labels) {
 
   const expandedMol = RDKit.get_mol(inputMol.add_hs(), JSON.stringify({ removeHs: false }));
   inputMol.delete();
+  if (!expandedMol?.is_valid()) throw new Error("RDKit AddHs 處理失敗。");
   const expandedData = JSON.parse(expandedMol.get_json());
   const expandedBondCount = expandedData.molecules[0].bonds.length;
   const invalid = labels.find(([index]) => index >= expandedBondCount);
@@ -325,12 +331,21 @@ function prepareMolecule(smiles, labels) {
   expandedMol.delete();
 
   const selectiveMol = RDKit.get_mol(trimmed.molblock, JSON.stringify({ removeHs: false }));
-  if (!selectiveMol?.is_valid()) throw new Error("無法建立選擇性含氫分子圖。");
-  const remappedLabels = labels.map(([oldIndex, value]) => {
-    const newIndex = trimmed.bondMap.get(oldIndex);
-    if (newIndex === undefined) throw new Error(`Bond ${oldIndex} 在選擇性含氫處理後不存在。`);
-    return [newIndex, value];
-  });
+  if (!selectiveMol?.is_valid()) {
+    disposeMol(selectiveMol);
+    throw new Error("無法建立選擇性含氫分子圖。");
+  }
+  let remappedLabels;
+  try {
+    remappedLabels = labels.map(([oldIndex, value]) => {
+      const newIndex = trimmed.bondMap.get(oldIndex);
+      if (newIndex === undefined) throw new Error(`Bond ${oldIndex} 在選擇性含氫處理後不存在。`);
+      return [newIndex, value];
+    });
+  } catch (cause) {
+    disposeMol(selectiveMol);
+    throw cause;
+  }
   return { mol: selectiveMol, labels: remappedLabels, sourceBondCount: expandedBondCount };
 }
 
@@ -404,14 +419,14 @@ async function copyMoleculeImage() {
 
 function render() {
   error.textContent = "";
+  let candidateMol;
   try {
     const inputLabels = parseBondDict($("#bond-dict").value);
-    currentMol?.delete();
     const prepared = prepareMolecule($("#smiles").value.trim(), inputLabels);
-    currentMol = prepared.mol;
+    candidateMol = prepared.mol;
     const labels = prepared.labels;
 
-    const moleculeData = JSON.parse(currentMol.get_json());
+    const moleculeData = JSON.parse(candidateMol.get_json());
     const bondCount = moleculeData.molecules[0].bonds.length;
 
     const highlightedBonds = labels.map(([index]) => index);
@@ -435,8 +450,8 @@ function render() {
       padding: 0.12,
     };
     const highlightedOptions = { ...baseOptions, bonds: highlightedBonds };
-    const baseMarkup = currentMol.get_svg_with_highlights(JSON.stringify(baseOptions));
-    const highlightedMarkup = currentMol.get_svg_with_highlights(JSON.stringify(highlightedOptions));
+    const baseMarkup = candidateMol.get_svg_with_highlights(JSON.stringify(baseOptions));
+    const highlightedMarkup = candidateMol.get_svg_with_highlights(JSON.stringify(highlightedOptions));
 
     drawing.innerHTML = baseMarkup;
     const svg = drawing.querySelector("svg");
@@ -451,7 +466,13 @@ function render() {
     summary.textContent = prepared.sourceBondCount === bondCount
       ? `${bondCount} bonds · ${labels.length} labeled`
       : `${bondCount} visible · ${prepared.sourceBondCount} after AddHs · ${labels.length} labeled`;
+
+    const previousMol = currentMol;
+    currentMol = candidateMol;
+    candidateMol = undefined;
+    disposeMol(previousMol);
   } catch (cause) {
+    disposeMol(candidateMol);
     error.textContent = cause instanceof Error ? cause.message : String(cause);
   }
 }

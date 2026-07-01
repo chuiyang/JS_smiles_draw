@@ -21,7 +21,7 @@
       <section class="workspace">
         <form id="controls" class="control-panel">
           <label class="field-label" for="smiles">SMILES</label>
-          <textarea id="smiles" rows="3" spellcheck="false">CC(=O)Oc1ccccc1C(=O)O[H]</textarea>
+          <textarea id="smiles" rows="3" spellcheck="false">CC(=O)Oc1ccccc1C(=O)O</textarea>
 
           <div class="field-heading">
             <label class="field-label" for="bond-dict">Bond dict</label>
@@ -33,9 +33,10 @@
   "3": 305,
   "9": "C–C · 346 kJ/mol",
   "11": 745,
-  "13": "O–H · 463 kJ/mol"
+  "20": "O–H · 463 kJ/mol"
 }</textarea>
-          <p class="input-hint">C–H / O–H 請在 SMILES 使用顯式氫，例如 <code>O[H]</code>；該鍵結才會有 bond index。</p>
+          <p class="input-hint">H-bond index 使用 RDKit <code>AddHs</code> 後的編號；沒有 bond note 的氫會自動收起。</p>
+          <div id="h-bond-info" class="h-bond-info" aria-live="polite"></div>
 
           <div class="font-controls">
             <label>
@@ -55,8 +56,8 @@
               <input id="atom-font-size" type="range" min="12" max="30" value="20" />
             </label>
             <label>
-              <span class="field-label">Highlight width <output id="highlight-width-value">9×</output></span>
-              <input id="highlight-width" type="range" min="4" max="20" value="9" />
+              <span class="field-label">Molecule scale <output id="molecule-scale-value">150%</output></span>
+              <input id="molecule-scale" type="range" min="75" max="200" step="5" value="150" />
             </label>
           </div>
 
@@ -67,7 +68,12 @@
         <section class="drawing-panel" aria-label="分子圖">
           <div class="drawing-toolbar">
             <div><span class="highlight-key"></span>Bond energy supplied</div>
-            <div id="summary">準備繪圖…</div>
+            <div class="drawing-actions">
+              <div id="summary">準備繪圖…</div>
+              <button id="copy-image" class="copy-button" type="button" disabled aria-label="Copy molecule image">
+                <span aria-hidden="true">⧉</span><span id="copy-image-label">Copy image</span>
+              </button>
+            </div>
           </div>
           <div id="drawing" class="drawing" aria-live="polite">
             <div class="loader"><span></span>正在載入 RDKit WebAssembly</div>

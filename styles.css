@@ -53,6 +53,7 @@ textarea { display: block; margin-top: 9px; padding: 13px 14px; resize: vertical
 textarea:focus, select:focus { border-color: #6f8c75; box-shadow: 0 0 0 3px rgba(92, 126, 101, .12); }
 .input-hint { margin: 9px 2px 0; color: #718078; font-size: .72rem; line-height: 1.5; }
 .input-hint code { padding: .08em .3em; }
+.h-bond-info { margin-top: 8px; color: #53665a; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .65rem; line-height: 1.5; }
 
 .font-controls { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px 14px; margin-top: 24px; padding-top: 23px; border-top: 1px solid #dde3da; }
 .font-controls label { min-width: 0; }
@@ -69,6 +70,11 @@ button:hover { transform: translateY(-1px); background: #294532; }
 .drawing-toolbar, .footnote { display: flex; justify-content: space-between; gap: 20px; color: #718078; font-size: .73rem; }
 .drawing-toolbar { padding-bottom: 16px; border-bottom: 1px solid #edf0ea; }
 .highlight-key { display: inline-block; width: 22px; height: 8px; margin-right: 8px; border-radius: 3px; vertical-align: 1px; background: #ffe87a; }
+.drawing-actions { display: flex; align-items: center; gap: 14px; }
+.copy-button { display: inline-flex; justify-content: center; align-items: center; gap: 6px; width: auto; margin: -7px 0; padding: 7px 10px; border: 1px solid #cdd7cc; border-radius: 8px; background: #f7faf5; color: #405247; font-size: .72rem; font-weight: 750; box-shadow: none; }
+.copy-button:hover { transform: none; background: #edf3ea; }
+.copy-button:disabled { opacity: .5; cursor: wait; }
+.copy-button.is-copied { border-color: #86a68b; background: #e8f3e7; color: #2f603b; }
 .drawing { display: grid; place-items: center; min-height: 500px; overflow: hidden; }
 .drawing > svg { display: block; width: 100%; max-height: 610px; }
 .footnote { padding-top: 15px; border-top: 1px solid #edf0ea; text-transform: uppercase; letter-spacing: .08em; }
